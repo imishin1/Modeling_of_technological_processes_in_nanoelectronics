@@ -53,18 +53,24 @@ class Culculation_param:
     def find_Diff(self, n, temperature):
         return 0.66 * np.exp(-3.44 / self.k / temperature) + 12 * (n / self.find_ni(temperature)) * np.exp(-4.05 / self.k / temperature)
 
+class List_of_param():
+    # Create a necessary lists for calculating param and drawing the graphs
+    def __init__(self, n):
+        # создание нулевого массива длинной n
+        self.new_list = np.zeros(n)
+
 class Draw_graph(Culculation_param):
     def draw(self):
         n = 200
-        C_list = [0] * n
-        x_list = [0] * n
-        a_list = [0] * n
-        b_list = [0] * n 
-        d_list = [0] * n
-        delta_list = [0] * n
-        lambda_list = [0] * n
-        r_list = [0] * n
-        Cn_list = [0] * n
+        # Define the necessary objects of the class List_of_param
+        C_list = List_of_param(n).new_list
+        x_list = List_of_param(n).new_list
+        a_list = List_of_param(n).new_list
+        b_list = List_of_param(n).new_list
+        d_list = List_of_param(n).new_list
+        delta_list = List_of_param(n).new_list
+        lambda_list = List_of_param(n).new_list
+        r_list = List_of_param(n).new_list
         dt = 1
         dx = self.x / (10000 * n)
 
@@ -87,7 +93,6 @@ class Draw_graph(Culculation_param):
             x_list[i] = dx * i
         for j in range (0, self.t_zagonka):
             for i in range (1, n - 1):
-                # тут до n-2 не будет работать
                 b_list[i] = 1
                 d_list[i] = 1
                 a_list[i] = (- (2 + (dx ** 2) / (self.find_Diff(C_list[i], self.T_zagonka) * dt)))
@@ -96,10 +101,12 @@ class Draw_graph(Culculation_param):
                 delta_list[i] = (- d_list[i] / (a_list[i] + b_list[i] * delta_list[i-1]))
                 lambda_list[i] = ((r_list[i] - b_list[i] * lambda_list[i-1]) / (a_list[i] + b_list[i] * delta_list[i-1]))
             C_list[n-1] = lambda_list[n-1]
-        
+
+            # в этом цикле граница идет до -1, так как в питоне правая граница не включается, то есть здесь идет до 0 включительно
             for i in range(n-2, -1, -1):
                 C_list[i] = C_list[i+1] * delta_list[i] + lambda_list[i]
 
+        # draw zagonka
         fig, axes = plt.subplots()
         axes.plot(x_list, C_list)
 
@@ -120,7 +127,6 @@ class Draw_graph(Culculation_param):
 
         for j in range (0, self.t_razgonka):
             for i in range (1, n - 1):
-                # тут до n-2 не будет работать
                 b_list[i] = 1
                 d_list[i] = 1
                 a_list[i] = (- (2 + (dx ** 2) / (self.find_Diff(C_list[i], self.T_razgonka) * dt)))
@@ -130,15 +136,18 @@ class Draw_graph(Culculation_param):
                 lambda_list[i] = ((r_list[i] - b_list[i] * lambda_list[i-1]) / (a_list[i] + b_list[i] * delta_list[i-1]))
             C_list[n-1] = lambda_list[n-1]
         
+            # в этом цикле граница идет до -1, так как в питоне правая граница не включается, то есть здесь идет до 0 включительно
             for i in range(n-2, -1, -1):
                 C_list[i] = C_list[i+1] * delta_list[i] + lambda_list[i]
 
+        # draw zagonka
         axes.plot(x_list, C_list)
-
         axes.set_xlim(0)
+
         plt.show()
 
 def main():
+    # объявляем объем и запускаем функции рисования
     As = Draw_graph()
     As.draw()
 
