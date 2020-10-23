@@ -1,3 +1,4 @@
+# импортируем расчетные библиотеки
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -63,6 +64,7 @@ class Draw_graph(Culculation_param):
     def draw(self):
         n = 200
         # Define the necessary objects of the class List_of_param
+        # По сути просто объявляем нулевые массивы длиной n для дальнейших расчетов
         C_list = List_of_param(n).new_list
         x_list = List_of_param(n).new_list
         a_list = List_of_param(n).new_list
@@ -141,6 +143,7 @@ class Draw_graph(Culculation_param):
             for i in range(n-2, -1, -1):
                 C_list[i] = C_list[i+1] * delta_list[i] + lambda_list[i]
 
+            # собираем список с модулями разницы C_As - C_list[i], чтобы найти минимальное значение и определить глубину залегания p-n перехода
             for i in range(0, n):
                 p_n[i] = np.absolute(self.C_As - C_list[i])
 
