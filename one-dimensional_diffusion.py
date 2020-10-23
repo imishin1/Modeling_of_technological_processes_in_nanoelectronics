@@ -20,12 +20,12 @@ class Physical_quantities:
 
 class Initial_param:
     def __init__(self):
-        self.N_As = 4E+16 # sm^-3
+        self.C_As = 4E+16 # sm^-3
         self.T_zagonka = 1050 + 273 # K
         self.t_zagonka = 15 * 60 # s
         self.T_razgonka = 950 + 273 # K
         self.t_razgonka = 15 * 60 # s
-        self.x = 0.8 # mkm - вводим вручную
+        self.x = float(input('введите максимальную глубину расчета в мкм => ')) # mkm - вводим вручную
         self.Ea = 2.42 # eV
         self.D0 = 8.5E-2 # sm^2 / 
         self.C0 = 2E21
@@ -71,6 +71,7 @@ class Draw_graph(Culculation_param):
         delta_list = List_of_param(n).new_list
         lambda_list = List_of_param(n).new_list
         r_list = List_of_param(n).new_list
+        p_n = List_of_param(n).new_list
         dt = 1
         dx = self.x / (10000 * n)
 
@@ -140,6 +141,13 @@ class Draw_graph(Culculation_param):
             for i in range(n-2, -1, -1):
                 C_list[i] = C_list[i+1] * delta_list[i] + lambda_list[i]
 
+            for i in range(0, n):
+                p_n[i] = np.absolute(self.C_As - C_list[i])
+
+        # возвращает индекс наименьшего элемента массива p_n
+        min_p_n = np.argmin(p_n)
+        print(f'глубина залегания p-n перехода => {round(x_list[min_p_n] * 10000, 3)} мкм')
+
         # draw zagonka
         axes.plot(x_list, C_list)
         axes.set_xlim(0)
@@ -151,5 +159,6 @@ def main():
     As = Draw_graph()
     As.draw()
 
+# запускаем тело программы
 if __name__ == "__main__":
     main()
