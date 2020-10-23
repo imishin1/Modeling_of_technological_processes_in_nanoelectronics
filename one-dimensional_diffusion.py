@@ -2,6 +2,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 # Mishin Ilya
 # The prosecc of deffusion
@@ -154,6 +155,16 @@ class Draw_graph(Culculation_param):
         # draw zagonka
         axes.plot(x_list, C_list)
         axes.set_xlim(0)
+        axes.set_ylim(0)
+
+        plt.title('Распеделение концентрации по глубине залегания', pad = 20)
+        plt.xlabel('х, м')
+        plt.ylabel('С, см^-3')
+
+        # Добавление дополнительной ссетки
+        axes.grid(which='major', color = '#666666')
+        axes.minorticks_on()
+        axes.grid(which='minor', color = 'gray', linestyle = ':')
 
         plt.show()
 
