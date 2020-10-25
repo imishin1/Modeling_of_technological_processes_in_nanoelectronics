@@ -154,12 +154,12 @@ class Draw_graph(Culculation_param):
 
         # draw zagonka
         axes.plot(x_list, C_list)
-        axes.set_xlim(0)
-        axes.set_ylim(0)
+        axes.set_xlim(0, self.x * 1E-4)
+        axes.set_ylim(0, self.C0)
 
         plt.title('Распеделение концентрации по глубине залегания', pad = 20)
-        plt.xlabel('х, м')
-        plt.ylabel('С, см^-3')
+        plt.xlabel('х, см')
+        plt.ylabel('С, см⁻³')
 
         # Добавление дополнительной ссетки
         axes.grid(which='major', color = '#666666')
