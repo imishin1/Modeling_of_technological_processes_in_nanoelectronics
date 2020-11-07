@@ -11,13 +11,13 @@ class Matrix_of_param():
 
 class Draw_graph3D(Culculation_param):
     def draw3D(self):
-        n = 20
-        m = 20
+        n = 50
+        m = 50
         dt = 10
 
         # введем размеры образца и окна в сантиметрах
-        x_window = 1.5E-4
-        xmax = 0.22 / 10000
+        x_window = 1E-4
+        xmax = 1 / 10000
         ymax = 3 / 10000
 
         # расчитаем приращение каждого шага
@@ -47,6 +47,9 @@ class Draw_graph3D(Culculation_param):
             if (y_list[j] > ((ymax - x_window) / 2)) and (y_list[j] < ((ymax - x_window) / 2 + x_window)):
                 C_matrix[0, j] = self.C0
 
+        for i in range (1, n-1):
+            b_list[i] = 1
+            d_list[i] = 1  
 
         # загонка
         for k in range (0, self.t_zagonka,  dt):
@@ -120,6 +123,7 @@ class Draw_graph3D(Culculation_param):
 
         #axes.scatter(y_list, x_list, C_matrix)
         axes.plot_wireframe(y_list, x_list, C_matrix)
+        #axes.plot_surface(y_list, x_list, C_matrix, color='#87CEFA')
 
         #axes.set(xlim=(0, xmax))
         #axes.set(ylim=(0, ymax))
@@ -128,6 +132,8 @@ class Draw_graph3D(Culculation_param):
         axes.set_title('Сергей Юрьевич - лучший преподователь')
 
         plt.show()
+
+
 
 
 
