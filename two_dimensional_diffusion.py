@@ -36,6 +36,7 @@ class Draw_graph3D(Culculation_param):
         delta_list = List_of_param(n).new_list
         lambda_list = List_of_param(n).new_list
         r_list = List_of_param(n).new_list
+        p_n = List_of_param(n).new_list
 
         # заполним списки x и y с заданным шагом
         for i in range(0, n):
@@ -102,7 +103,6 @@ class Draw_graph3D(Culculation_param):
         fig = plt.figure()
         axes = fig.add_subplot(projection='3d')
 
-
         axes.plot_wireframe(yo_list, xo_list, C_matrix, color='#FF8C00')
 
         # разгонка
@@ -136,21 +136,23 @@ class Draw_graph3D(Culculation_param):
                 for j in range(m - 2, -1, -1):
                     C_matrix[i, j] = delta_list[j] * C_matrix[i, j + 1] + lambda_list[j]
 
-
-
-
         axes.set_xlabel('x')
         axes.set_ylabel('y')
         axes.set_zlabel('z')
 
         axes.plot_wireframe(yo_list, xo_list, C_matrix)
-        #axes.plot_surface(y_list, x_list, C_matrix, color='#87CEFA')
 
-        axes.set_title('Сергей Юрьевич - лучший преподователь')
-
-
+        axes.set_title('Двумерная загонка и разгонка')
 
         plt.show()
+
+        # собираем список с модулями разницы C_As - C_list[i], чтобы найти минимальное значение и определить глубину залегания p-n перехода
+        for i in range(0, n):
+            p_n[i] = np.absolute(self.C_As - C_matrix[i, int(n / 2)])
+
+        # возвращает индекс наименьшего элемента массива p_n
+        min_p_n = np.argmin(p_n)
+        print(f'глубина залегания p-n перехода => {round(x_list[min_p_n] * 10000, 3)} мкм')
 
 def main():
     # объявляем объем и запускаем функции рисования
