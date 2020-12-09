@@ -1,4 +1,6 @@
+# Импорт основных физических параметров и функции задания массивов из предыдущих расчетных заданий
 from one_dimensional_diffusion import Physical_quantities, List_of_param
+# Импорт необходимых библиотек для расчетов и построений зависимости
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -119,10 +121,11 @@ class Draw_graph(Culculation_param):
         axes.minorticks_on()
         axes.grid(which='minor', color = 'gray', linestyle = ':')
 
+        # Вывод отрисовки на экран
         plt.show()
 
 def main():
-    # Объявляем экземпляр класса для отрисовки
+    # Объявляем экземпляр класса для отрисовки, выводим необходимые расчетные параметры на экран, и запускаем непосредственно функцию отрисовки графика
     new2 = Draw_graph()
     print(f'Se = {new2.Se(new2.E)}')
     print(f'Sn = {new2.Sn(new2.E)}')
