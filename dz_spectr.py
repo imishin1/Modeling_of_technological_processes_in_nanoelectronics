@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+# Создаем класс с основными физическими величинами
 class Physical_quantities:
     def __init__(self):
         self.q = 1.6e-19 # charge in Si
@@ -32,9 +33,11 @@ class Initial_param:
         self.dn = 100 # sm^2/s
 
 class Culculation_param:
+    # Зависимость n от длины волны
     def find_n(self, lambd):
         return 4 + 0.001106337 - 0.00314503 / lambd + 0.492812 / (lambd ** 2) - 0.601906 / (lambd ** 3) + 0.982897 / (lambd ** 4)
 
+    # Примерная апроксимация полиномом 6-ой степени для k
     def find_k(self, lambd):
         return -8342.9 * lambd ** 6 + 27697 * lambd ** 5 - 37013 * lambd ** 4 + 25399 * lambd ** 3 - 9410.2 * lambd ** 2 + 1773.8 * lambd - 128.92
     
@@ -59,7 +62,7 @@ class Draw_graph(Culculation_param):
         # Вводим область от 0.2 до 0.76 ввиду того, что апроксимация для функции параметра k была выведена для этих границ (сайт дает только такие)
         self.lambd_min = 0.2
         self.lambd_max = 0.76
-        self.lambd_step = 0.01
+        self.lambd_step = 0.001
 
     def count_S(self):
         m = 100
@@ -227,10 +230,13 @@ def draw_S(lambd_list, lambd_min, lambd_max, Sn_list, Sp_list, Sw_list, S_list):
     axes.plot(lambd_list, Sp_list, label='n')
     axes.plot(lambd_list, Sw_list, label='w')
     axes.plot(lambd_list, S_list, label='summ')
+
+    # Добавление легенды и ограничения осей
     axes.set_xlim(lambd_min, lambd_max)
     axes.set_ylim(0)
     plt.legend(loc=6)
 
+    # Добавление подписи для графика и его осей
     plt.title('Спектральная характеристика относительной \n фоточувствительности фотодиода', pad=10)
     plt.xlabel('λ, мм')
     plt.ylabel('S')
@@ -249,10 +255,13 @@ def draw_S_V(lambd_list, lambd_min, lambd_max, S_V1_list, S_V2_list, S_V3_list, 
     axes.plot(lambd_list, S_V2_list, label=f'Uвн = {V2} В')
     axes.plot(lambd_list, S_V3_list, label=f'Uвн = {V3} В')
     axes.plot(lambd_list, S_V4_list, label=f'Uвн = {V4} В')
+
+    # Добавление легенды и ограничения осей
     axes.set_xlim(lambd_min, lambd_max)
     axes.set_ylim(0)
     plt.legend(loc=6)
 
+    # Добавление подписи для графика и его осей
     plt.title('Спектральная характеристика относительной фоточувствительности \n фотодиода от внешнего смещения', pad=10)
     plt.xlabel('λ, мм')
     plt.ylabel('S')
