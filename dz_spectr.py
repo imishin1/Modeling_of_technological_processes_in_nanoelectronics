@@ -16,12 +16,6 @@ class List_of_param():
         # создание нулевого массива длинной n
         self.new_list = np.zeros(n)
 
-class myarray(np.ndarray):
-    def __new__(cls, *args, **kwargs):
-        return np.array(*args, **kwargs).view(myarray)
-    def index(self, value):
-        return np.where(self == value)
-
 class Initial_param:
     def __init__(self):
         self.x = 0.75 # mkm
@@ -30,20 +24,14 @@ class Initial_param:
         self.N_plus = self.N * 100 # sm^-3
         self.S = 5E4 # sm/s
         self.epsilond = 16
-        self.A = 1 # sm^2
         self.Eg = 0.67 # eV
-        self.d = 2 # mkm
-        self.I0 = 1E15
-        self.U = 0
-        self.ni = 24000000000000
-        self.dp = 50
-        self.dn = 100
+        self.d = 5 # mkm
+        self.I0 = 1E15 # Vt/sm
+        self.ni = 24000000000000 # sm^-3
+        self.dp = 50 # sm^2/s
+        self.dn = 100 # sm^2/s
 
 class Culculation_param:
-    def __init__(self):
-        Physical_quantities.__init__(self)
-        Initial_param.__init__(self)
-
     def find_n(self, lambd):
         return 4 + 0.001106337 - 0.00314503 / lambd + 0.492812 / (lambd ** 2) - 0.601906 / (lambd ** 3) + 0.982897 / (lambd ** 4)
 
@@ -60,14 +48,22 @@ class Culculation_param:
         return self.I0 * (1 - self.find_Re(lambd)) * self.find_alfa(k, lambd) * np.exp(-x * self.find_alfa(k, lambd))
 
 class Draw_graph(Culculation_param):
-    def draw(self):
-        m = 1000
-
+    def __init__(self, U):
+        Physical_quantities.__init__(self)
+        Initial_param.__init__(self)
+        self.Sn_list = list()
+        self.Sp_list = list()
+        self.Sw_list = list()
+        self.lambd_list = list()
+        self.U = U
         # Вводим область от 0.2 до 0.76 ввиду того, что апроксимация для функции параметра k была выведена для этих границ (сайт дает только такие)
-        lambd_min = 0.2
-        lambda_max = 0.76
-        lambda_step = 0.001
-        
+        self.lambd_min = 0.2
+        self.lambd_max = 0.76
+        self.lambd_step = 0.01
+
+    def count_S(self):
+        m = 100
+
         # Задаем нулевые массивы для глубины и генерации, а также рассчитываем величину приращения dx
         x_list = List_of_param(m).new_list
         G_list = List_of_param(m).new_list
@@ -79,7 +75,7 @@ class Draw_graph(Culculation_param):
         Wp = ((2 * self.epsilond * self.epsilond_0 * Nb * (fk - self.U) / self.q) ** 0.5) / self.N_plus
         Wn = ((2 * self.epsilond * self.epsilond_0 * Nb * (fk - self.U) / self.q) ** 0.5) / self.N
         W = Wn + Wp
-
+    
         # Рассчитываем число индексов для каждой области (нужно будет, чтобы разбить на разные массивы каждой области)
         sp = int((self.x * 1E-4 - Wp) * m / (self.d * 1E-4))
         sn = int((self.d * 1E-4 - self.x * 1E-4 - Wn) * m / (self.d * 1E-4))
@@ -104,9 +100,7 @@ class Draw_graph(Culculation_param):
         dpn_list = Gn_list * self.talu
         dnp_list = Gp_list * self.talu
 
-
         # --------------------------------------------------------------------------------------------------
-
 
         # Прогоночка p+
         a_list = List_of_param(sp).new_list
@@ -131,15 +125,12 @@ class Draw_graph(Culculation_param):
         d1_list[sp - 1] = 0
         r_list[sp - 1] = 0
 
-        lambd_list = list()
-        Sn_list = list()
-
-        for lambd in np.arange(lambd_min, lambda_max, lambda_step):
+        for lambd in np.arange(self.lambd_min, self.lambd_max, self.lambd_step):
             for i in range (0, m):
                 x_list[i] = i * dx
                 G_list[i] = self.find_G_x(x_list[i], self.find_k(lambd), lambd)
 
-            for j in range (0, 1000):
+            for j in range (0, 100):
                 for i in range (1, sp - 1):
                     d1_list[i] = 1
                     a_list[i] = -2 - (dx * dx / (self.dn * self.talu))
@@ -163,12 +154,10 @@ class Draw_graph(Culculation_param):
             jn = self.q * self.dn * (dnp_list[sp - 2] - dnp_list[sp - 1]) / dx
             P = self.I0 * self.q * 1.24 / lambd
             S = abs(jn / P)
-            lambd_list.append(lambd)
-            Sn_list.append(S)
-
+            self.lambd_list.append(lambd)
+            self.Sn_list.append(S)
 
         # --------------------------------------------------------------------------------------------------
-
 
         # Прогоночка для n
         a_list = List_of_param(sn).new_list
@@ -193,15 +182,12 @@ class Draw_graph(Culculation_param):
         de_list[0] = -d1_list[0] / a_list[0]
         la_list[0] = r_list[0] / a_list[0]
 
-        Sp_list = list()
-        Sw_list = list()
-
-        for lambd in np.arange(lambd_min, lambda_max, lambda_step):
+        for lambd in np.arange(self.lambd_min, self.lambd_max, self.lambd_step):
             for i in range (0, m):
                 x_list[i] = i * dx
                 G_list[i] = self.find_G_x(x_list[i], self.find_k(lambd), lambd)
 
-            for j in range (0, 1000):
+            for j in range (0, 100):
                 for i in range (1, sn - 1):
                     d1_list[i] = 1
                     a_list[i] = -2 - (dx * dx / (self.dp * self.talu))
@@ -228,44 +214,69 @@ class Draw_graph(Culculation_param):
             self.q * self.I0 * (1 - self.find_Re(lambd)) * np.exp(-alfa * (self.x * 1E-4 - Wn))
             Sp = abs(jp / P)
             Sw = abs(jw / P)
-            Sp_list.append(Sp)
-            Sw_list.append(Sw)
+            self.Sp_list.append(Sp)
+            self.Sw_list.append(Sw)
         
         # тут просто сложение элементов трех массивов, чтоб определить общую S
-        S_list = list(map(lambda x, y, z: x + y + z, Sp_list, Sw_list, Sn_list))
+        self.S_list = list(map(lambda x, y, z: x + y + z, self.Sp_list, self.Sw_list, self.Sn_list))
 
-        fig, axes = plt.subplots()
+def draw_S(lambd_list, lambd_min, lambd_max, Sn_list, Sp_list, Sw_list, S_list):
+    fig, axes = plt.subplots()
 
-        axes.plot(lambd_list, Sn_list, label='p+')
-        axes.plot(lambd_list, Sp_list, label='n')
-        axes.plot(lambd_list, Sw_list, label='w')
-        axes.plot(lambd_list, S_list, label='summ')
-        #axes.plot(x_list, G_list)
-        #axes.plot(xp_list, dnp_list)
-        #axes.plot(xn_list, dpn_list)
-        #axes.plot(xn_list, Gn_list)
-        #axes.plot(xp_list, Gp_list)
-        #axes.plot([self.x * 1E-4 + Wn, self.x * 1E-4 + Wn], [G_list[0], G_list[-1]])
-        #axes.plot([self.x * 1E-4 - Wp, self.x * 1E-4 - Wp], [G_list[0], G_list[-1]])
+    axes.plot(lambd_list, Sn_list, label='p+')
+    axes.plot(lambd_list, Sp_list, label='n')
+    axes.plot(lambd_list, Sw_list, label='w')
+    axes.plot(lambd_list, S_list, label='summ')
+    axes.set_xlim(lambd_min, lambd_max)
+    axes.set_ylim(0)
+    plt.legend(loc=6)
 
-        axes.set_xlim(lambd_min, lambda_max)
-        axes.set_ylim(0)
-        plt.legend(loc=6)
+    plt.title('Спектральная характеристика относительной \n фоточувствительности фотодиода', pad=10)
+    plt.xlabel('λ, мм')
+    plt.ylabel('S')
 
-        plt.title('Спектральная характеристика относительной \n фоточувствительности фотодиода', pad=10)
-        plt.xlabel('λ, мм')
-        plt.ylabel('S')
+    # Добавление дополнительной ссетки
+    axes.grid(which='major', color = '#666666')
+    axes.minorticks_on()
+    axes.grid(which='minor', color = 'gray', linestyle = ':')
 
-        # Добавление дополнительной ссетки
-        axes.grid(which='major', color = '#666666')
-        axes.minorticks_on()
-        axes.grid(which='minor', color = 'gray', linestyle = ':')
+    plt.show()
 
-        plt.show()
+def draw_S_V(lambd_list, lambd_min, lambd_max, S_V1_list, S_V2_list, S_V3_list, S_V4_list, V1, V2, V3, V4):
+    fig, axes = plt.subplots()
+
+    axes.plot(lambd_list, S_V1_list, label=f'Uвн = {V1} В')
+    axes.plot(lambd_list, S_V2_list, label=f'Uвн = {V2} В')
+    axes.plot(lambd_list, S_V3_list, label=f'Uвн = {V3} В')
+    axes.plot(lambd_list, S_V4_list, label=f'Uвн = {V4} В')
+    axes.set_xlim(lambd_min, lambd_max)
+    axes.set_ylim(0)
+    plt.legend(loc=6)
+
+    plt.title('Спектральная характеристика относительной фоточувствительности \n фотодиода от внешнего смещения', pad=10)
+    plt.xlabel('λ, мм')
+    plt.ylabel('S')
+
+    # Добавление дополнительной ссетки
+    axes.grid(which='major', color = '#666666')
+    axes.minorticks_on()
+    axes.grid(which='minor', color = 'gray', linestyle = ':')
+
+    plt.show()
 
 def main():
-    Ge = Draw_graph()
-    Ge.draw()
+    Ge = Draw_graph(0)
+    Ge.count_S()
+    draw_S(Ge.lambd_list, Ge.lambd_min, Ge.lambd_max, Ge.Sn_list, Ge.Sp_list, Ge.Sw_list, Ge.S_list)
+    Ge_V1 = Draw_graph(0)
+    Ge_V2 = Draw_graph(-0.5)
+    Ge_V3 = Draw_graph(-1)
+    Ge_V4 = Draw_graph(-1.5)
+    Ge_V1.count_S()
+    Ge_V2.count_S()
+    Ge_V3.count_S()
+    Ge_V4.count_S()
+    draw_S_V(Ge.lambd_list, Ge.lambd_min, Ge.lambd_max, Ge_V1.S_list, Ge_V2.S_list, Ge_V3.S_list, Ge_V4.S_list, Ge_V1.U, Ge_V2.U, Ge_V3.U, Ge_V4.U)
 
 # запускаем тело программы
 if __name__ == "__main__":
